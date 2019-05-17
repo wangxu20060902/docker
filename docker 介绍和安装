@@ -1,0 +1,25 @@
+Docker 介绍和优势
+启动非常快 秒级别实现
+资源利用率高，一台高配置服务器可以跑上千个docker容器
+更快的交付和部署，一次创建和配置后，可以在任意地方运行
+内核级别的虚拟化，会有更高的性能和效率
+易迁移，平台依懒性不强
+docker 核心概念
+镜像：是一个只读的模板，类似于安装系统用的那个iso文件，我们通过镜像来完成各种应用的部署
+容器：镜像类似于操作系统，而容器类似于虚拟机本身。它可以被启动、开始、停止、删除等操作，么个容器都是相互隔离的
+仓库，存放镜像的一个场所，仓库分为公开仓库和私有仓库。大的共有仓库是Docker hub（hub.docker.com）,国内公开仓库（dockerpool.com）
+docker 安装
+系统准备
+centos 更改国内yum源 
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup  备份系统自带yum源
+wget http://mirrors.163.com/.help/CentOS7-Base-163.repo  下载国内yum 源
+yum makecache   生成缓存
+yum update -y
+docker安装
+wget https://download.docker.com/linux/centos/docker-ce.repo /etc/yum.repos.d/ 下载docker 的yum 源
+yum install -y docker-ce  安装docker 社区版
+systemctl start docker  启动docker 服务
+systemctl enable docker 开机启动docker服务
+systemctl status docker  查看docker的状态
+systemctl  stop docker 停止docker服务
+systemctl restart docker   重启docker 服务
