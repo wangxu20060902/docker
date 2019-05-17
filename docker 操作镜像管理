@@ -1,0 +1,19 @@
+docker镜像管理
+更改国内镜像源加速器 
+登录到阿里云  找到镜像服务 然后把自己镜像加速地址把地址copy出来
+vim /etc/docker/daemon.json             粘贴copy的地址 wq 保存退出
+docker search 镜像名                    查找镜像
+docker pull 镜像名                      下载镜像
+docker tag 镜像名  新镜像名:版本号      镜像打标签
+docker run -itd --name 容器名 镜像      启动docker  -i标准输入打开-t启动伪终端-d后台运行
+docker rmi 镜像名或镜像id               删除镜像 注意镜像ID是把相同的镜像全部删除
+docker ps                               查看启动的容器
+docker  ps -a                           查看所有容器 -q 所有启动容器的id
+docker exec -it 容器名或ID /bin/bash    进入容器 bash  
+docker commit 创建镜像 -m(Commit message) -a(Author) 容器id  新镜像名  通过容器创建镜像例子：
+docker commit -m "install net-tools" -a "wangxu" 6dc1c978c2d0  docker_nettool
+cat 模板名 |docker import - 镜像名  先下载镜像然后通过命令操作 通过模板创建镜像
+docker save -o /tmp/wangxu.tar docker_nettool    ###docker save -o 指定路径 要导出的镜像名 把镜像导出一个文件
+docker load --input /tmp/wangxu.tar 或者 docker load </tmp/wangxu.tar    通过导出的镜像文件恢复镜像
+
+
