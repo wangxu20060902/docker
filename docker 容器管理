@@ -1,0 +1,13 @@
+docker 容器管理
+docker create -it centos bash                //创建一个容器，但容器并不会启动
+docker start container_id                    //启动容器，启动后可以使用docker ps 查看 有start stop 和restart
+docker run  -itd --name 容器名 镜像名 bash     //docker run相当于docker create再start,进入容器的虚拟终端 我们可以运行一些命令，
+使用exit 或者ctrl+d退出bash，退出容器后容器停止 
+docker run -itd --name firstdocker centos bash -c "while :;do echo "helloworld";sleep 2;done" //运行并启动一个容器-d 放后台运行  --name 容器命名 -c 附加命令
+docker run -rm -it centos bash -c "sleep 30"   //--rm 可以让容器退出后直接删除 在这里容器执行完命令就会退出
+docker logs container_name //可以获取到容器的运行历史信息
+docker attach container_id //可以进入一个后台运行的容器,但是用exit退出时，这样容器也就退出了
+docker exec -it container_id bash  //这样可以临时打开一个虚拟终端，exit退出后容器依然运行着
+docker rm container_id  //删除容器命令，运行的容器需要加-f container_id id 是docker ps 出来的id  docker ps -q 可以列出所有container_id,
+docker export container_id >file.tar //导出容器，可以迁移到其他机器上 需要导入
+docker file.tar |docker import - image_name  //导入容器为镜像
