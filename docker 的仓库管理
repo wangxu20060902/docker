@@ -1,0 +1,19 @@
+docker 的仓库管理
+docker pull registry  //下载registry镜像
+docker run -d --name firstregistry -p 5000:5000 registry //以registry镜像启动容器
+curl 192.168.124.141:5000/v2/_catalog  //访问registry 是否启动成功
+docker tag images_name:v1 192.168.124.141:5000/centos  //上传镜像到私有仓库，需要先标记一下tag，这里必须有私有仓库的ip：port
+docker push 192.168.124.141:5000/centos  //把标记好的镜像推送到私有仓库，此时不会成功报错：Get https://192.168.124.141:5000/v2/: http: server gave HTTP response to HTTPS client
+需要进行一下操作：vim /etc/docker/daemon.json  更改地址如下把原来的代理更换为私有仓库地址
+私有仓库地址
+{
+  "insecure-registries": ["192.168.124.141:5000"]
+}
+原来加速镜像源
+{
+  "registry-mirrors": ["https://zs138f6o.mirror.aliyuncs.com"]
+}
+systemctl restart docker //重新启动docker
+docker start $(docker ps -aq) //启动所有容器
+docker push 192.168.124.141:5000/centos  //把镜像推到私有仓库,推私有仓库需要先打tag 规则私有仓库ip：port/image_name
+docker pull docker push 192.168.124.141:5000/centos //私有仓库下载镜像，docker pull时去官网下载 私有仓库下载需要指定ip端口和镜像名
