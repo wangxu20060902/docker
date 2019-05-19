@@ -1,0 +1,39 @@
+Dockerfile 创建镜像
+Dockerfile 格式
+1.FROM  <images>or<image>:<tag> //指定基础镜像为例如：FROM centos 或者 FROM centos:latest
+2.MAINTAINER <name> //指定作者信息 例如：MAITAINER WANGXU  
+3.RUN <command> or ["executable","param1","param2"]  //镜像操作命令 例如:RUN yum install vim -y 或者RUN ["/bin/bash","-c","echo hello"] 命令选项参数用,""分开
+4.CMD ["executable","param1","param2"] or command param1  param2 or["param1","param2"] //CMD 用来指定容器启动时用到的命令，只能有一条生效 例如：
+CMD ["/bin/bash","/usr/local/nginx/sbin/nginx","-c","/usr/local/nginx/conf/nginx.conf"] 
+5.EXPOSE <port> or [port1 port2 port3] //指定容器要映射出去的端口号，这个要配合-p或者-P来使用的 -p做指定端口映射 -P 宿主机端口自动分配 例如 EXPOSE 22 80 8080
+6.ENV <key> <value> //指定环境变量 例如:ENV PATH /usr/local/mysql/bin:$PATH 主要为RUN指令提供一个环境变量，我们也可以自定义一些变量 ENV MYSQL_version 5.6
+7.ADD <src> <dest>  //将本地文件或目录copy到容器的某个目录里，src为Dockerfile所在目录的相对路径，ADD 也可以是一个URL 例如 ADD conf/vhost /usr/local/nginx/conf/
+ADD https://github.com/jpetazzo/pipework /root/ 会下载pipework 到容器的root目录下
+8.COPY <src> <dest> //格式同ADD 不同的是copy不支持url
+9.ENTRYPOINT ["executable","param1","param2"] or command param1  param2 or["param1","param2"] //格式类似CMD 容器启动时要执行的命令，也只有一条生效，如果多条最后一条生效
+和CMD的不同是：CMD 是可以被docker run 指令覆盖的，而ENTRYPOINT 不能被覆盖 例如 在Dockerfile 中写了一条 CMD ["/bin/echo","test"] 启动容器 docker run centos  命令会输出 test
+如果启动为 docker run -it centos bash 什么都不会输出。ENTRYPOINT 不会被覆盖，而且会比CMD或者docker run 命令靠前执行 ENTRYPOINT ["/bin/echo","test"]  docker run -it centos 123
+则会输出 test 123，这相当于执行命令echo test 123
+10.VOLUME ["/data"] //创建一个可以从本地主机桌其他容器挂的挂载点
+11.USER <username>  //指定运行容器的用户
+12.WORKDIR /path/to/workdir //为后续的RUN、CMDh或者ENTRYPOINTz指定工作目录
+使用Dockerfile 创建nginx镜像 vim Dockerfile 添加以下信息
+##基础镜像
+FROM centos
+##信息
+MAINTAINER wangxu20060902@163.com
+##安装依赖环境
+RUN yum install -y pcre-devel wget net-tools gcc zlib zlib-devel make openssl-devel
+##install Nginx
+WORKDIR /root
+ADD http://nginx.org/download/nginx-1.16.0.tar.gz /root
+RUN tar zxvf /root/nginx-1.16.0.tar.gz
+RUN mkdir -p /usr/local/nginx
+RUN cd nginx-1.16.0 && ./configure --prefix=/usr/local/nginx && make && make install
+##Espose ports
+EXPOSE 80
+##Set the default command to execute when creating w new container
+ENTRYPOINT /usr/local/nginx/sbin/nginx && tail -f /etc/passwd
+保存Dockerfile 运行命令
+docker build -t image_name .   //此命令利用Dockerfile 创建一个镜像
+
