@@ -1,0 +1,28 @@
+docker 的网络模式
+host模式，使用docker run 时使用--net=host指定 //docker 使用的网络实际上和宿主一样的，在容器网卡内看到的网卡ip是宿主机ip
+container 模式，使用--net=container:container_id/container_name //多个容器使用共同的网络，看到的ip是一样的
+none 模式，使用--net=none 指定 //这种模式不会配置任何网络
+bridge模式， 使用-net=bridge指定默认模式，如果不指定网络默认就是bridge网络模式，这种模式为么个容器分配一个队的Network Namespace；类似vmware的nat网络模式
+类似vmware的nat网络模式，同一个宿主机上的所有容器会在同一个网段下，相互之间是可以通信的
+一台主机想访问另一台主机里docker 部署的应用怎么操作：首先保证两台宿主机相通，然后在部署docker的机器上运行容器时使用-p进行端口映射，实例
+vm01 ip：192.168.124.140   vm02 ip 192.168.124.141  vm02 运行docker服务  运行 
+docker run -itd --name centos_with_nginx  centos bash //运行启动一个容器使用centos镜像
+docker exit -it centos_with_nginx bash  //进入到容器中
+yum install epel-release -y && yum install nginx -y && systemctl start nginx  //在容器安装nginx服务报错：Failed to get D-Bus connection: Operation not permitted
+原因分析 dbus-daemon没有启动，解决问题启动容器时 加上 --privileged -e "container=docker" 并且要把最后的命令改为 /usr/sbin/init
+docker run -itd --privileged -e "container=docker" --name nginx_myself -p 8088:80 centos_with_nginx /usr/sbin/init //解决nginx 启动不了的方案
+docker exec -it nginx_myself bash  //进入容器nginx_myself systemctl start nginx 启动nginx服务
+curl localhost:8088 //分别在vm01 和 vm02 上执行这个命令会出现nginx的test page页面说明成功
+docker commit -m "centos_with_nginx" -a "wangxu" e5a0da1d9c81 centos_with_nginx //把容器打包成镜像 
+第三方网络模式 pipework 可以让容器和宿主机使用同一个交换机，这个方案是将docker 容器配置到和主机同一网段的需求，实现主要将docker容器和宿主机
+的网卡桥接起来，再给容器配上ip 就可以了
+安装pipework
+git clone https://github.com/jpetazzo/pipework //从github上克隆pipework  
+cp pipework/pipework /usr/local/bin/  //添加pipework 启动项
+cd /etc/sysconfig/network-scripts/; cp ifcfg-ens33 ifcfg-br0  //创建虚拟网卡br0
+vim ifcfg-br0 //更改配置根据需求注释掉UUID 配置 TPYE=Bridge  IPADDR  GATEWAY  NETMASK  NAME DEVICE DNS
+vim ifcfg-ens33  //注释UUID和原来的ip配置 最后追加BRIDGE=br0  保存重启网卡 systemctl restart network-scripts/
+docker run -itd --name pipework_centos --net=none centos_with_nettool bash //开启一个容器进行测试
+docker run -it container_name bash  //运行命令ifconfig 容器没有网卡
+pipework br0 container_name 192.168.124.150/24@192.168.124.2 //150为容器的ip地址，@后面为网关ip地址
+docker run -it container_name bash //进入容器执行ifconfig  查看ip的分配为150 配置完成 可以在其他在同一网段机器上测试连接到容器
