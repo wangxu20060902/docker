@@ -1,0 +1,8 @@
+docker 的数据管理
+docker run -itd --name container_name -v /data/:/data centos bash //-v 用来指定挂载目录，前面/data/为宿主机目录，如果目录都不存在系统会自动创建
+docker run -itd --name new_container_name -v /data/ image_name bash //注意这里的/data目录是容器里的目录，非本地目录，这个目录也可以让其他容器用来挂在
+docker run -itd --name container_name --volumes-from container_exist image_name bash  //--volumes-from参数使新启动的容器，使用container_exist容器的数据卷
+docker run -itd --name container_name -volumes-from container_exist -v /data/backup/:/data centos bash //数据卷备份，启动一个新容器挂载已运行容器的挂在的数据卷，
+再使用-v 重新挂在一个本地目录，然后可以使用tar 命令把/data 目录打包备份
+docker run -itd -v /data/ --name new_container_name centos bash //新建数据卷容器
+docker run -itd  --name new_container_name --volumes-from  container_exist  -v /data/backup/:backup centos bash //先新建一个数据卷容器，再建一个新的容器加载这个数据卷容器，然后把tar解压
