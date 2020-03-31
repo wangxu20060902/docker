@@ -98,6 +98,13 @@ openssl x509 -inform PEM -in edu.harbor.com.crt -out edu.harbor.com.cert
 mkdir -p /etc/docker/certs.d/edu.harbor.com
 cp edu.harbor.com.cert edu.harbor.com.key ca.crt /etc/docker/certs.d/edu.harbor.com/
 
+mkdir -p /opt/harbor/
+wget -P /opt/harbor/ https://storage.googleapis.com/harbor-releases/release-1.9.0/harbor-offline-installer-v1.9.0.tgz
+cd /opt/harbor/
+tar xf harbor-offline-installer-v1.9.0.tgz
+cd /opt/harbor/harbor
+cp harbor.yml harbor.yml.bak
+
 vim  harbor.yml   更改配置文件
 hostname: edu.harbor.com
 
